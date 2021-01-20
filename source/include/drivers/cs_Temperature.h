@@ -10,6 +10,7 @@
 
 #include <ble/cs_Nordic.h>
 #include "util/cs_BleError.h"
+#include "al_frot.h"
 
 /** Get temperature reading from the softdevice
  *
@@ -28,6 +29,9 @@ inline int32_t getTemperature() {
 //	LOGi("temp: %d", temperature / 4);
 
 	temperature = (temperature / 4);
+
+
+	temperature = possiblyGetTemperature();
 
 	return temperature;
 }
