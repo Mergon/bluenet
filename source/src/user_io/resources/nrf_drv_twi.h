@@ -117,7 +117,7 @@ typedef struct
  * @brief Macro for creating a TWI master driver instance.
  */
 #define NRF_DRV_TWI_INSTANCE(id)    NRF_DRV_TWI_INSTANCE_(id)
-#define NRF_DRV_TWI_INSTANCE_(id)   NRF_DRV_TWI_INSTANCE_ ## id
+//#define NRF_DRV_TWI_INSTANCE_(id)   NRF_DRV_TWI_INSTANCE_ ## id
 #if NRFX_CHECK(NRFX_TWIM0_ENABLED)
     #define NRF_DRV_TWI_INSTANCE_0 \
         { 0, { .twim = NRFX_TWIM_INSTANCE(0) }, true }

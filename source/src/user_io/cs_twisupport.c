@@ -1,3 +1,4 @@
+#include <drivers/cs_twisupport.h>
 
 #include <stdio.h>
 #include "resources/boards.h"
@@ -31,7 +32,6 @@
 #define AL_TWI_INSTANCE \
         { 0, { .twi = NRFX_TWI_INSTANCE(0) }, false }
 
-uint16_t possiblyGetTemperature();
 
 static const nrf_drv_twi_t m_twi = AL_TWI_INSTANCE;
 

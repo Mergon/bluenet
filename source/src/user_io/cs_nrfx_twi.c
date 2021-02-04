@@ -48,7 +48,7 @@
 
 #include <nrfx_twi.h>
 #include <hal/nrf_gpio.h>
-#include "prs/nrfx_prs.h"
+#include "resources/nrfx_prs.h"
 
 #define NRFX_LOG_MODULE TWI
 #include <nrfx_log.h>
