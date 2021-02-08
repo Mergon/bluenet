@@ -185,6 +185,9 @@ void handleZeroCrossing() {
 
 Crownstone::Crownstone(boards_config_t& board) :
 	_boardsConfig(board),
+#if BUILD_MEM_USAGE_TEST == 1
+	_memTest(board),
+#endif
 	_mainTimerId(NULL),
 	_operationMode(OperationMode::OPERATION_MODE_UNINITIALIZED)
 {
@@ -408,21 +411,15 @@ void Crownstone::configure() {
 	LOGi("> stack ...");
 	_stack->initRadio();
 
-	configureStack();
-
 	// Don't do garbage collection now, it will block reading flash.
 //	_storage->garbageCollect();
 
 	increaseResetCounter();
 
-	setName();
+	setName(true);
 
 	LOGi("> advertisement ...");
 	configureAdvertisement();
-}
-
-void Crownstone::configureStack() {
-
 }
 
 void Crownstone::configureAdvertisement() {
@@ -552,17 +549,12 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 //	_operationMode = newMode;
 }
 
-void Crownstone::setName() {
-	static bool addResetCounterToName = false;
-#if CHANGE_NAME_ON_RESET==1
-	addResetCounterToName = true;
-#endif
-//	TYPIFY(CONFIG_NAME)
+void Crownstone::setName(bool firstTime) {
 	char device_name[32];
 	cs_state_data_t stateNameData(CS_TYPE::CONFIG_NAME, (uint8_t*)device_name, sizeof(device_name));
 	_state->get(stateNameData);
 	std::string deviceName;
-	if (addResetCounterToName) {
+	if (g_CHANGE_NAME_ON_RESET) {
 		//! clip name to 5 chars and add reset counter at the end
 		TYPIFY(STATE_RESET_COUNTER) resetCounter;
 		_state->get(CS_TYPE::STATE_RESET_COUNTER, &resetCounter, sizeof(resetCounter));
@@ -572,7 +564,11 @@ void Crownstone::setName() {
 	} else {
 		deviceName = std::string(device_name, MIN(stateNameData.size, 5));
 	}
-	_advertiser->updateDeviceName(deviceName);
+	if (firstTime) {
+		_advertiser->setDeviceName(deviceName);
+	} else {
+		_advertiser->updateDeviceName(deviceName);
+	}
 }
 
 void Crownstone::startOperationMode(const OperationMode & mode) {
@@ -719,6 +715,12 @@ void Crownstone::startUp() {
 	_mesh->startSync();
 #endif
 
+#if BUILD_MEM_USAGE_TEST == 1
+	if (_operationMode == OperationMode::OPERATION_MODE_NORMAL) {
+		_memTest.start();
+	}
+#endif
+
 	// Clear all reset reasons after initializing and starting all modules.
 	// So the modules had the opportunity to read it out.
 	sd_power_reset_reason_clr(0xFFFFFFFF);
@@ -747,6 +749,10 @@ void Crownstone::tick() {
 		GpRegRet::clearAll();
 		_clearedGpRegRetCount = true;
 	}
+
+#if BUILD_MEM_USAGE_TEST == 1
+	_memTest.onTick();
+#endif
 
 	Watchdog::kick();
 
